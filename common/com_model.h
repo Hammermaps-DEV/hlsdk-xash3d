@@ -38,10 +38,11 @@
 
 typedef enum
 {
-	mod_brush, 
-	mod_sprite, 
-	mod_alias, 
-	mod_studio
+        mod_bad = -1,
+        mod_brush,
+        mod_sprite,
+        mod_alias,
+        mod_studio
 } modtype_t;
 
 // must match definition in modelgen.h

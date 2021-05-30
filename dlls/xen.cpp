@@ -94,7 +94,7 @@ void CXenPLight::Spawn( void )
 
 	UTIL_SetSize( pev, Vector( -80, -80, 0 ), Vector( 80, 80, 32 ) );
 	SetActivity( ACT_IDLE );
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 	pev->frame = RANDOM_FLOAT( 0, 255 );
 
 	m_pGlow = CSprite::SpriteCreate( XEN_PLANT_GLOW_SPRITE, pev->origin + Vector( 0, 0, ( pev->mins.z + pev->maxs.z ) * 0.5f ), FALSE );
@@ -111,7 +111,7 @@ void CXenPLight::Precache( void )
 void CXenPLight::Think( void )
 {
 	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 
 	switch( GetActivity() )
 	{
@@ -193,13 +193,13 @@ void CXenHair::Spawn( void )
 
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
-	pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.1f, 0.4f );	// Load balance these a bit
+	SetNextThink( RANDOM_FLOAT( 0.1f, 0.4f ) );	// Load balance these a bit
 }
 
 void CXenHair::Think( void )
 {
 	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.5f;
+	SetNextThink( 0.5f );
 }
 
 void CXenHair::Precache( void )
@@ -283,7 +283,7 @@ void CXenTree::Spawn( void )
 
 	UTIL_SetSize( pev, Vector( -30, -30, 0 ), Vector( 30, 30, 188 ) );
 	SetActivity( ACT_IDLE );
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 	pev->frame = RANDOM_FLOAT( 0, 255 );
 	pev->framerate = RANDOM_FLOAT( 0.7f, 1.4f );
 
@@ -375,7 +375,7 @@ void CXenTree::HandleAnimEvent( MonsterEvent_t *pEvent )
 void CXenTree::Think( void )
 {
 	float flInterval = StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 	DispatchAnimEvents( flInterval );
 
 	switch( GetActivity() )
@@ -443,7 +443,7 @@ CXenHull *CXenHull::CreateHull( CBaseEntity *source, const Vector &mins, const V
 {
 	CXenHull *pHull = GetClassPtr( (CXenHull *)NULL );
 
-	UTIL_SetOrigin( pHull->pev, source->pev->origin + offset );
+	UTIL_SetOrigin( pHull, source->pev->origin + offset );
 	SET_MODEL( pHull->edict(), STRING( source->pev->model ) );
 	pHull->pev->solid = SOLID_BBOX;
 	pHull->pev->classname = MAKE_STRING( "xen_hull" );
@@ -515,7 +515,7 @@ void CXenSpore :: Spawn( void )
 	pev->frame = RANDOM_FLOAT( 0, 255 );
 	pev->framerate = RANDOM_FLOAT( 0.7f, 1.4f );
 	ResetSequenceInfo();
-	pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.1f, 0.4f );	// Load balance these a bit
+	SetNextThink( RANDOM_FLOAT( 0.1f, 0.4f ) );	// Load balance these a bit
 }
 
 const char *CXenSpore::pModelNames[] =
@@ -536,8 +536,9 @@ void CXenSpore::Touch( CBaseEntity *pOther )
 
 void CXenSpore::Think( void )
 {
-	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1f;
+	float flInterval = StudioFrameAdvance();
+	SetNextThink( 0.1f );
+
 #if 0
 	DispatchAnimEvents( flInterval );
 

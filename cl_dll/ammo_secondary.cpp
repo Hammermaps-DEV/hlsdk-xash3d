@@ -60,8 +60,10 @@ int CHudAmmoSecondary::Draw( float flTime )
 
 	// draw secondary ammo icons above normal ammo readout
 	int a, x, y, r, g, b, AmmoWidth;
-	UnpackRGB( r, g, b, RGB_YELLOWISH );
+
+	UnpackRGB( r, g, b, gHUD.m_iHUDColor ); //LRC
 	a = (int)Q_max( MIN_ALPHA, m_fFade );
+
 	if( m_fFade > 0 )
 		m_fFade -= ( (float)gHUD.m_flTimeDelta * 20.0f );  // slowly lower alpha to fade out icons
 	ScaleColors( r, g, b, a );

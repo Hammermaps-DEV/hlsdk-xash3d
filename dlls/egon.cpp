@@ -388,8 +388,10 @@ void CEgon::UpdateEffect( const Vector &startPoint, const Vector &endPoint, floa
 	else
 		m_pBeam->SetColor( (int)( 60 + ( 25 * timeBlend ) ), (int)( 120 + ( 30 * timeBlend ) ), (int)( 64 + 80 * fabs( sin( gpGlobals->time * 10.0f ) ) ) );
 
-	UTIL_SetOrigin( m_pSprite->pev, endPoint );
+//	UTIL_SetOrigin( m_pSprite->pev, endPoint );
+	UTIL_SetOrigin( m_pSprite, endPoint );
 	m_pSprite->pev->frame += 8.0f * gpGlobals->frametime;
+
 	if( m_pSprite->pev->frame > m_pSprite->Frames() )
 		m_pSprite->pev->frame = 0;
 

@@ -71,12 +71,12 @@ void CCrossbowBolt::Spawn()
 
 	SET_MODEL( ENT( pev ), "models/crossbow_bolt.mdl" );
 
-	UTIL_SetOrigin( pev, pev->origin );
+	UTIL_SetOrigin( this, pev->origin );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
 	SetTouch( &CCrossbowBolt::BoltTouch );
 	SetThink( &CCrossbowBolt::BubbleThink );
-	pev->nextthink = gpGlobals->time + 0.2f;
+	SetNextThink( 0.2f );
 }
 
 void CCrossbowBolt::Precache()
@@ -142,32 +142,32 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 	{
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, "weapons/xbow_hit1.wav", RANDOM_FLOAT( 0.95f, 1.0f ), ATTN_NORM, 0, 98 + RANDOM_LONG( 0, 7 ) );
 
-		SetThink( &CBaseEntity::SUB_Remove );
-		pev->nextthink = gpGlobals->time;// this will get changed below if the bolt is allowed to stick in what it hit.
+		SetThink(&CCrossbowBolt:: SUB_Remove );
+		SetNextThink( 0 );// this will get changed below if the bolt is allowed to stick in what it hit.
 
 		if( FClassnameIs( pOther->pev, "worldspawn" ) )
 		{
 			// if what we hit is static architecture, can stay around for a while.
 			Vector vecDir = pev->velocity.Normalize();
-			UTIL_SetOrigin( pev, pev->origin - vecDir * 12.0f );
+			UTIL_SetOrigin( this, pev->origin - vecDir * 12.0f );
 			pev->angles = UTIL_VecToAngles( vecDir );
 			pev->solid = SOLID_NOT;
 			pev->movetype = MOVETYPE_FLY;
 			pev->velocity = Vector( 0, 0, 0 );
 			pev->avelocity.z = 0;
 			pev->angles.z = RANDOM_LONG( 0, 360 );
-			pev->nextthink = gpGlobals->time + 10.0f;
+			SetNextThink( 10.0f );
 		}
 		else if( pOther->pev->movetype == MOVETYPE_PUSH || pOther->pev->movetype == MOVETYPE_PUSHSTEP )
 		{
 			Vector vecDir = pev->velocity.Normalize();
-			UTIL_SetOrigin( pev, pev->origin - vecDir * 12.0f );
+			UTIL_SetOrigin( this, pev->origin - vecDir * 12.0f );
 			pev->angles = UTIL_VecToAngles( vecDir );
 			pev->solid = SOLID_NOT;
 			pev->velocity = Vector( 0, 0, 0 );
 			pev->avelocity.z = 0;
 			pev->angles.z = RANDOM_LONG( 0, 360 );
-			pev->nextthink = gpGlobals->time + 10.0f;			
+			SetNextThink( 10.0f );
 
 			if( g_fIsXash3D )
 			{
@@ -186,15 +186,15 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		SetThink( &CCrossbowBolt::ExplodeThink );
-		pev->nextthink = gpGlobals->time + 0.1f;
+		SetNextThink( 0.1f );
 	}
 }
 
 void CCrossbowBolt::BubbleThink( void )
 {
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 
-	if( pev->waterlevel == 0 )
+	if (pev->waterlevel == 0 || pev->watertype <= CONTENT_FLYFIELD)
 		return;
 
 	UTIL_BubbleTrail( pev->origin - pev->velocity * 0.1f, pev->origin, 1 );
@@ -436,7 +436,7 @@ void CCrossbow::FireBolt()
 	pBolt->pev->angles = anglesAim;
 	pBolt->pev->owner = m_pPlayer->edict();
 
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if (m_pPlayer->pev->waterlevel == 3 && m_pPlayer->pev->watertype > CONTENT_FLYFIELD)
 	{
 		pBolt->pev->velocity = vecDir * BOLT_WATER_VELOCITY;
 		pBolt->pev->speed = BOLT_WATER_VELOCITY;
@@ -476,7 +476,7 @@ void CCrossbow::SecondaryAttack()
 		m_fInZoom = 1;
 	}
 
-	pev->nextthink = UTIL_WeaponTimeBase() + 0.1f;
+	SetNextThink( 0.1f );
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.0f;
 }
 

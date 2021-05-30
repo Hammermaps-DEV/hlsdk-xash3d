@@ -35,7 +35,7 @@ class CApache : public CBaseMonster
 
 	void Spawn( void );
 	void Precache( void );
-	int Classify( void ) { return CLASS_HUMAN_MILITARY; };
+	int Classify( void ) { return CLASS_HUMAN_MILITARY; }
 	int BloodColor( void ) { return DONT_BLEED; }
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
@@ -122,13 +122,17 @@ void CApache::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/apache.mdl" );
+	if (pev->model)
+		SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
+	else
+		SET_MODEL( ENT( pev ), "models/apache.mdl" );
 	UTIL_SetSize( pev, Vector( -32.0f, -32.0f, -64.0f ), Vector( 32.0f, 32.0f, 0.0f ) );
-	UTIL_SetOrigin( pev, pev->origin );
+	UTIL_SetOrigin( this, pev->origin );
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
-	pev->health = gSkillData.apacheHealth;
+	if (pev->health == 0)
+		pev->health = gSkillData.apacheHealth;
 
 	m_flFieldOfView = -0.707f; // 270 degrees
 
@@ -146,7 +150,7 @@ void CApache::Spawn( void )
 	{
 		SetThink( &CApache::HuntThink );
 		SetTouch( &CApache::FlyTouch );
-		pev->nextthink = gpGlobals->time + 1.0f;
+		SetNextThink( 1.0f );
 	}
 
 	m_iRockets = 10;
@@ -154,7 +158,10 @@ void CApache::Spawn( void )
 
 void CApache::Precache( void )
 {
-	PRECACHE_MODEL( "models/apache.mdl" );
+	if (pev->model)
+		PRECACHE_MODEL(STRING(pev->model)); //LRC
+	else
+		PRECACHE_MODEL( "models/apache.mdl" );
 
 	PRECACHE_SOUND( "apache/ap_rotor1.wav" );
 	PRECACHE_SOUND( "apache/ap_rotor2.wav" );
@@ -178,14 +185,14 @@ void CApache::Precache( void )
 void CApache::NullThink( void )
 {
 	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.5f;
+	SetNextThink( 0.5f );
 }
 
 void CApache::StartupUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	SetThink( &CApache::HuntThink );
 	SetTouch( &CApache::FlyTouch );
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 	SetUse( NULL );
 }
 
@@ -199,7 +206,7 @@ void CApache::Killed( entvars_t *pevAttacker, int iGib )
 	UTIL_SetSize( pev, Vector( -32.0f, -32.0f, -64.0f ), Vector( 32.0f, 32.0f, 0.0f ) );
 	SetThink( &CApache::DyingThink );
 	SetTouch( &CApache::CrashTouch );
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 	pev->health = 0;
 	pev->takedamage = DAMAGE_NO;
 
@@ -216,7 +223,7 @@ void CApache::Killed( entvars_t *pevAttacker, int iGib )
 void CApache::DyingThink( void )
 {
 	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 
 	pev->avelocity = pev->avelocity * 1.02f;
 
@@ -283,7 +290,7 @@ void CApache::DyingThink( void )
 
 		// don't stop it we touch a entity
 		pev->flags &= ~FL_ONGROUND;
-		pev->nextthink = gpGlobals->time + 0.2f;
+		SetNextThink( 0.2f );
 		return;
 	}
 	else
@@ -397,8 +404,8 @@ void CApache::DyingThink( void )
 			WRITE_BYTE( BREAK_METAL );
 		MESSAGE_END();
 
-		SetThink( &CBaseEntity::SUB_Remove );
-		pev->nextthink = gpGlobals->time + 0.1f;
+		SetThink( &CApache::SUB_Remove );
+		SetNextThink( 0.1f );
 	}
 }
 
@@ -421,7 +428,7 @@ void CApache::CrashTouch( CBaseEntity *pOther )
 	{
 		SetTouch( NULL );
 		m_flNextRocket = gpGlobals->time;
-		pev->nextthink = gpGlobals->time;
+		SetNextThink( 0 );
 	}
 }
 
@@ -433,7 +440,7 @@ void CApache::GibMonster( void )
 void CApache::HuntThink( void )
 {
 	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 
 	ShowDamage();
 
@@ -458,7 +465,7 @@ void CApache::HuntThink( void )
 	if( m_flGoalSpeed < 800.0f )
 		m_flGoalSpeed += 5.0f;
 
-	if( m_hEnemy != 0 )
+	if (m_hEnemy != 0)
 	{
 		// ALERT( at_console, "%s\n", STRING( m_hEnemy->pev->classname ) );
 		if( FVisible( m_hEnemy ) )
@@ -552,7 +559,7 @@ void CApache::HuntThink( void )
 	{
 		if( m_flLastSeen + 60.0f > gpGlobals->time )
 		{
-			if( m_hEnemy != 0 )
+			if (m_hEnemy != 0)
 			{
 				// make sure it's a good shot
 				if( DotProduct( m_vecTarget, vecEst ) > .965f )
@@ -954,16 +961,16 @@ void CApacheHVR::Spawn( void )
 
 	SET_MODEL( ENT( pev ), "models/HVR.mdl" );
 	UTIL_SetSize( pev, Vector( 0, 0, 0), Vector(0, 0, 0) );
-	UTIL_SetOrigin( pev, pev->origin );
+	UTIL_SetOrigin( this, pev->origin );
 
 	SetThink( &CApacheHVR::IgniteThink );
-	SetTouch( &CGrenade::ExplodeTouch );
+	SetTouch(&CApacheHVR :: ExplodeTouch );
 
 	UTIL_MakeAimVectors( pev->angles );
 	m_vecForward = gpGlobals->v_forward;
 	pev->gravity = 0.5f;
 
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 
 	pev->dmg = 150;
 }
@@ -1000,7 +1007,7 @@ void CApacheHVR::IgniteThink( void )
 
 	// set to accelerate
 	SetThink( &CApacheHVR::AccelerateThink );
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 }
 
 void CApacheHVR::AccelerateThink( void )
@@ -1022,6 +1029,6 @@ void CApacheHVR::AccelerateThink( void )
 	// re-aim
 	pev->angles = UTIL_VecToAngles( pev->velocity );
 
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetNextThink( 0.1f );
 }
 #endif

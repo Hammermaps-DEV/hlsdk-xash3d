@@ -99,13 +99,8 @@ void CHandGrenade::Holster( int skiplocal /* = 0 */ )
 	{
 		// no more grenades!
 		m_pPlayer->pev->weapons &= ~( 1 << WEAPON_HANDGRENADE );
-		DestroyItem();
-	}
-
-	if( m_flStartThrow )
-	{
-		m_flStartThrow = 0.0f;
-		m_flReleaseThrow = 0.0f;
+		SetThink(&CHandGrenade:: DestroyItem );
+		SetNextThink( 0.1f );
 	}
 
 	EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "common/null.wav", 1.0f, ATTN_NORM );

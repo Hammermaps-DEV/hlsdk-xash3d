@@ -159,7 +159,7 @@ void CCrowbar::PrimaryAttack()
 	{
 #ifndef CLIENT_DLL
 		SetThink( &CCrowbar::SwingAgain );
-		pev->nextthink = gpGlobals->time + 0.1f;
+		SetNextThink( 0.1f );
 #endif
 	}
 }
@@ -261,12 +261,12 @@ int CCrowbar::Swing( int fFirst )
 #endif
 			{
 				// first swing does full damage
-				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB ); 
+				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgCrowbar, gpGlobals->v_forward, &tr, DMG_CLUB );
 			}
 			else
 			{
 				// subsequent swings do half
-				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgCrowbar * 0.5f, gpGlobals->v_forward, &tr, DMG_CLUB ); 
+				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgCrowbar / 2, gpGlobals->v_forward, &tr, DMG_CLUB );
 			}
 			ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 
@@ -311,7 +311,7 @@ int CCrowbar::Swing( int fFirst )
 
 			if( g_pGameRules->IsMultiplayer() )
 			{
-				// override the volume here, cause we don't play texture sounds in multiplayer, 
+				// override the volume here, cause we don't play texture sounds in multiplayer,
 				// and fvolbar is going to be 0 from the above call.
 
 				fvolbar = 1.0f;
@@ -321,7 +321,7 @@ int CCrowbar::Swing( int fFirst )
 			switch( RANDOM_LONG( 0, 1 ) )
 			{
 			case 0:
-				EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG( 0, 3 ) ); 
+				EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/cbar_hit1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG( 0, 3 ) );
 				break;
 			case 1:
 				EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/cbar_hit2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG( 0, 3 ) );
@@ -335,7 +335,8 @@ int CCrowbar::Swing( int fFirst )
 		m_pPlayer->m_iWeaponVolume = (int)( flVol * CROWBAR_WALLHIT_VOLUME );
 
 		SetThink( &CCrowbar::Smack );
-		pev->nextthink = gpGlobals->time + 0.2f;
+
+		SetNextThink( 0.2f );
 #endif
 #if CROWBAR_DELAY_FIX
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25f;

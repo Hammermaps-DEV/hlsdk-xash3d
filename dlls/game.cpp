@@ -46,6 +46,8 @@ cvar_t defaultteam	= { "mp_defaultteam","0" };
 cvar_t allowmonsters	= { "mp_allowmonsters","0", FCVAR_SERVER };
 cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
 
+cvar_t	impulsetarget={"sohl_impulsetarget","0", FCVAR_SERVER }; //LRC - trigger ents manually
+cvar_t	mw_debug={"sohl_mwdebug","0", FCVAR_SERVER }; //LRC - debug info. for MoveWith. (probably not useful for most people.)
 cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
 cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 
@@ -492,6 +494,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &teamoverride );
 	CVAR_REGISTER( &defaultteam );
 	CVAR_REGISTER( &allowmonsters );
+	CVAR_REGISTER (&impulsetarget); //LRC
+	CVAR_REGISTER (&mw_debug); //LRC
 	CVAR_REGISTER( &bhopcap );
 	CVAR_REGISTER( &multibyte_only );
 
